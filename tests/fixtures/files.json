@@ -1,0 +1,14 @@
+[
+  {
+    "docType": "File",
+    "_id": "125",
+    "path": "/myfolder",
+    "name": "mybill",
+    "mime": "document",
+    "binary": { 
+      "file": {
+        "id": "555"
+      }
+    }
+  }
+]
