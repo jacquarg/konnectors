@@ -65,30 +65,9 @@ const connecteur = module.exports = factory.createNew({
 
   models: [MaifUser],
   fetchOperations: [
-  // test
   refreshToken
   ]
 });
-
-// function test(){
-  // connecteur.logger.info("test function");
-  // return (localization.t('bad credentials');
-  // localization.t('notification bills', {
-  //     smart_count: "test"
-  //   });
-  // const options = {
-  //   test: 3
-  //   };
-  //   const notifContent = localization.t('bad credentials', options);
-  //   notifHelper.createTemporary({
-  //     app: 'konnectors',
-  //     text: notifContent,
-  //     resource: {
-  //       app: 'MAIF',
-  //       url: '',
-  //     },
-  //   });
-// }
 
 /**
 * return connection url with all params
@@ -207,7 +186,6 @@ function getData(token, res){
         }
         connecteur.logger.info("DONNEES RECUPEREES ET INSEREES AVEC SUCCES");
       });
-
     }, false);
   });
 }
@@ -220,6 +198,7 @@ function getData(token, res){
 */
 function refreshToken(){
   MaifUser.getOne((err, maifuser) => {
+    var token_valid = true;
     if(maifuser != undefined){
         var token = maifuser['password'];
       if(token != undefined){
@@ -240,10 +219,9 @@ function refreshToken(){
           Header : "Authorization: Basic "+b64client,
           Data : "grant_type=refresh_token&refresh=" + token
         };
-        request(options, (err, response, body) =>{
+        request(options, (err, response, body) => {
           if(err != null || JSON.parse(body).id_token == undefined){ //refresh token not valid anymore
-            connecteur.logger.error("Token non valide. Veuillez vous reconnecter.");
-            //send error
+            token_valid = false;
           }
           var json_token = JSON.parse(body);
           var token = json_token.id_token;
@@ -253,11 +231,22 @@ function refreshToken(){
         }, false);
       }
       else{
-        //send error
+        token_valid = false;
       }
     }
     else{
-      //send error
+      token_valid = false
+    }
+    if(!token_valid){
+      connecteur.logger.error("Token non valide. Veuillez vous reconnecter.");
+      const notifContent = localization.t('refresh token not valid', {});
+      notifHelper.createTemporary({
+        app: 'konnectors',
+        text: notifContent,
+        resource: {
+          app: 'konnectors/konnector/maif',
+        }
+      });
     }
   });
 }
