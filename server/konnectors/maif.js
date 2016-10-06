@@ -106,9 +106,9 @@ module.exports.getCode = (req, res) => {
     var b64client = new Buffer(client_id+':'+secret).toString('base64');
 
     instance.api.getCozyDomain((err, domain) => {
-      if(domain.indexOf("localhost") != -1){ //contains localhost, transform https to http
-        domain = domain.replace("https", "http");
-      }
+      // if(domain.indexOf("localhost") != -1){ //contains localhost, transform https to http
+      //   domain = domain.replace("https", "http");
+      // }
 
       var url_redirect = domain + 'apps/konnectors/public/getCode';
       var options = {
