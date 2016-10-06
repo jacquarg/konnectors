@@ -30,13 +30,15 @@ OVHFetcher = (function() {
         if (err === 401 || err === 403) {
           return _this.needToConnectFirst(requiredFields, next);
         } else if (err) {
-          return next(err);
+          _this.logger.info(err);
+          return next('bad credentials');
         }
         return async.map(ovhBills, function(ovhBill, cb) {
           return _this.ovh.request('GET', '/me/bill/' + ovhBill, cb);
         }, function(err, ovhBills) {
           if (err) {
-            return next(err);
+            _this.logger.info(err);
+            return next('request error');
           }
           bills.fetched = [];
           ovhBills.forEach(function(ovhBill) {
@@ -70,7 +72,8 @@ OVHFetcher = (function() {
     this.logger.info('Request the login url...');
     return this.ovh.request('POST', '/auth/credential', accessRules, function(err, credential) {
       if (err) {
-        return callback(err);
+        this.logger.info(err);
+        return callback('token not found');
       }
       return callback(null, credential.validationUrl, credential.consumerKey);
     });
@@ -106,12 +109,14 @@ OVHFetcher = (function() {
     return this.getLoginUrl((function(_this) {
       return function(err, url, token) {
         if (err) {
-          return callback(err);
+          _this.logger.info(err);
+          return callback('request error');
         }
         requiredFields.loginUrl = url;
         requiredFields.token = token;
         return _this.saveUrlAndToken(url, token, function() {
-          return callback(new Error('You need to login to your OVH account first.'));
+          this.logger.info('You need to login to your OVH account first.');
+          return callback('konnector ovh connect first');
         });
       };
     })(this));
