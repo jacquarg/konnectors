@@ -91,14 +91,17 @@ function getConnectUrl(){
 * call post request to get token
 */
 module.exports.getCode = (req, res) => {
+  console.log("get code module");
   const payload = {};
 
   MaifUser.getOne(function(err, maifuser){ //check if user doesn't already exist in database
     if(maifuser == undefined){
+      console.log("create user");
         MaifUser.create(payload, (err, maifuser) => { //creation du maifuser dans db avec le code
         });
     }
     else{
+      console.log("got user");
         maifuser.updateAttributes(payload, (err) => { //mise à jour du maifuser en base avec le code
         });
     }

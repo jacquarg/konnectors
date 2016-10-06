@@ -26,6 +26,7 @@ MaifUser.getOne = function(callback) {
   return MaifUser.request("all", {}, function(err, maifusers) {
     var error;
     error = err || maifusers.error;
+    console.log(err);
     return callback(error, maifusers[0]);
   });
 };
