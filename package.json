@@ -161,7 +161,7 @@
     "User": {
       "description": "The user's timezone is required to import properly events."
     },
-    "maifUser": {
+    "MaifUser": {
       "description": "Pour enregistrer et récupérer vos données."
     }
   }
