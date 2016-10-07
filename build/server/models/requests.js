@@ -10,6 +10,9 @@ module.exports = {
   konnector: {
     all: americano.defaultRequests.all
   },
+  maifuser: {
+    all: americano.defaultRequests.all
+  },
   bankoperation: {
     byDate: americano.defaultRequests.by('date')
   },
