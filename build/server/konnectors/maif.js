@@ -17,7 +17,7 @@ var notifHelper = new NotifHelper('konnectors');
 
 var factory = require('../lib/base_konnector');
 
-var MaifUser = require('../models/maifUser');
+var MaifUser = require('../models/maifuser');
 
 var client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
 var secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";

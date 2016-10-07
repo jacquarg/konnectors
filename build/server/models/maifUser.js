@@ -3,7 +3,7 @@ var MaifUser, cozydb;
 
 cozydb = require('cozydb');
 
-MaifUser = cozydb.getModel('Maifuser', {
+MaifUser = cozydb.getModel('MaifUser', {
   password: {
     type: String
   },
