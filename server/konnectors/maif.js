@@ -56,9 +56,9 @@ const connecteur = module.exports = factory.createNew({
   <button id="connect-maif" class="btn" 
     onclick="window.open('${getConnectUrl()}' + '&redirect_uri=' + 
         document.location.origin + '/apps/konnectors/public/getCode',
-        'Maif OAuth')
+        'MaifConnect', 'width=800,height=600')
        return false;"
-       >Connexion</button>`, //, 'width=800,height=600'
+       >Connexion</button>`,
 
   fields: {
   },

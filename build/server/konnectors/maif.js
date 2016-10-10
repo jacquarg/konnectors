@@ -51,7 +51,7 @@ var connecteur = module.exports = factory.createNew({
   name: 'MAIF',
   slug: "MAIF",
   description: 'konnector description MAIF',
-  customView: '<h5>Connectez-vous pour récupérer vos données</h5>\n  <button id="connect-maif" class="btn" \n    onclick="window.open(\'' + getConnectUrl() + '\' + \'&redirect_uri=\' + \n        document.location.origin + \'/apps/konnectors/public/getCode\',\n        \'Maif OAuth\')\n       return false;"\n       >Connexion</button>', //, 'width=800,height=600'
+  customView: '<h5>Connectez-vous pour récupérer vos données</h5>\n  <button id="connect-maif" class="btn" \n    onclick="window.open(\'' + getConnectUrl() + '\' + \'&redirect_uri=\' + \n        document.location.origin + \'/apps/konnectors/public/getCode\',\n        \'MaifConnect\', \'width=800,height=600\')\n       return false;"\n       >Connexion</button>',
 
   fields: {},
 
