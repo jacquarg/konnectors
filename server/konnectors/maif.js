@@ -19,15 +19,69 @@ const factory = require('../lib/base_konnector');
 
 const MaifUser = require('../models/maifuser');
 
-const client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
-const secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
+// const client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
+// const secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
 // const client_id = "client-id";
 // const secret = "eX3mp1e";
 
-const connect_url = "http://connect-dev-d.maif.local/connect";
+const env = "dev"; //dev / pprod / prod
+
+var connect_url, apikey, info_url, client_id, secret;
+
+switch(env){
+  case "dev":
+    connect_url = "http://connect-dev-d.maif.local/connect";
+    apikey = "1f3299b5-967c-46ae-9bbe-94c22051da5e";
+    info_url = "http://slapp671.maif.local:7080/mapa/cozy/v1/mes_infos?apikey="+apikey;
+    client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
+    secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
+  break;
+  case "pprod":
+    connect_url = "http://connect-maiffr-pprodcorr.maif.local/connect/";
+    apikey = "1f3299b5-967c-46ae-9bbe-94c22051da5e";
+    info_url = "https://openapiweb-build.maif.fr/ppcor/cozy/v1/mes_infos?apikey="+apikey;
+    client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
+    secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
+  break;
+  case "prod":
+    connect_url = "https://connectbuild.maif.fr/connect";
+    apikey = "eeafd0bd-a921-420e-91ce-3b52ee5807e8";
+    info_url = "https://openapiweb.maif.fr/prod/cozy/v1/mes_infos?apikey="+apikey;
+    client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
+    secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
+  break;
+  default:
+    connect_url = "http://connect-dev-d.maif.local/connect";
+    apikey = "1f3299b5-967c-46ae-9bbe-94c22051da5e";
+    info_url = "http://slapp671.maif.local:7080/mapa/cozy/v1/mes_infos?apikey="+apikey;
+    client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
+    secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
+  break;
+}
+
+
+// get code/token url
 // const connect_url = "https://connectbuild.maif.fr/connect";
-const info_url = "http://slapp671.maif.local:7080/mapa/cozy/v1/mes_infos?apikey=1f3299b5-967c-46ae-9bbe-94c22051da5e ";
-// const info_url = "https://openapi.maif.fr/userInfo";
+//dev
+// const connect_url = "http://connect-dev-d.maif.local/connect";
+//preprod, a priori
+// const connect_url = "http://connect-maiffr-pprodcorr.maif.local/connect/";
+//prod ?
+// const connect_url = "https://connectbuild.maif.fr/connect"; //?
+
+//dev
+// const apikey = "1f3299b5-967c-46ae-9bbe-94c22051da5e";
+//preprod
+// const apikey = "1f3299b5-967c-46ae-9bbe-94c22051da5e";
+//prod
+// const apikey = "eeafd0bd-a921-420e-91ce-3b52ee5807e8";
+
+//dev
+// const info_url = "http://slapp671.maif.local:7080/mapa/cozy/v1/mes_infos?apikey="+apikey;
+//preprod
+// const info_url = "https://openapiweb-build.maif.fr/ppcor/cozy/v1/mes_infos?apikey="+apikey;
+//prod
+// const info_url = "https://openapiweb.maif.fr/prod/cozy/v1/mes_infos?apikey="+apikey;
 
 const scope = "openid+profile+offline_access";
 const type = "code";
@@ -56,7 +110,7 @@ const connecteur = module.exports = factory.createNew({
   <button id="connect-maif" class="btn" 
     onclick="window.open('${getConnectUrl()}' + '&redirect_uri=' + 
         document.location.origin + '/apps/konnectors/public/getCode',
-        'MaifConnect', 'width=800,height=600')
+        'MaifConnect', 'width=800,height=800')
        return false;"
        >Connexion</button>`,
 
@@ -91,17 +145,14 @@ function getConnectUrl(){
 * call post request to get token
 */
 module.exports.getCode = (req, res) => {
-  console.log("get code module");
   const payload = {};
 
   MaifUser.getOne(function(err, maifuser){ //check if user doesn't already exist in database
     if(maifuser == undefined){
-      console.log("create user");
         MaifUser.create(payload, (err, maifuser) => { //creation du maifuser dans db avec le code
         });
     }
     else{
-      console.log("got user");
         maifuser.updateAttributes(payload, (err) => { //mise à jour du maifuser en base avec le code
         });
     }
@@ -109,9 +160,9 @@ module.exports.getCode = (req, res) => {
     var b64client = new Buffer(client_id+':'+secret).toString('base64');
 
     instance.api.getCozyDomain((err, domain) => {
-      // if(domain.indexOf("localhost") != -1){ //contains localhost, transform https to http
-      //   domain = domain.replace("https", "http");
-      // }
+      if(domain.indexOf("localhost") != -1){ //contains localhost, transform https to http
+        domain = domain.replace("https", "http");
+      }
 
       var url_redirect = domain + 'apps/konnectors/public/getCode';
       var options = {
@@ -133,11 +184,9 @@ module.exports.getCode = (req, res) => {
         if(err != null){
           res.status(500).send("Erreur lors de la récupération des données.");
         }
-
         var json_token = JSON.parse(body);
         var token = json_token.id_token;
         var token_refresh = json_token.refresh_token;
-
         getToken(token, token_refresh, res);
       }, false);
     });
@@ -184,10 +233,17 @@ function getData(token, res){
       var payload = {profile: JSON.parse(body)};
 
       maifuser.updateAttributes(payload, (err) => { //mise à jour du maifuser en base en insérant le token
+        const notifContent = localization.t('data retrieved', {});
+        notifHelper.createTemporary({
+          app: 'konnectors',
+          text: notifContent,
+          resource: {
+            app: 'konnectors/konnector/maif',
+          }
+        });
         if(res != undefined){
           res.status(200).send("Données récupérées avec succès.");
         }
-        connecteur.logger.info("DONNEES RECUPEREES ET INSEREES AVEC SUCCES");
       });
     }, false);
   });
@@ -223,14 +279,27 @@ function refreshToken(){
           Data : "grant_type=refresh_token&refresh=" + token
         };
         request(options, (err, response, body) => {
-          if(err != null || JSON.parse(body).id_token == undefined){ //refresh token not valid anymore
-            token_valid = false;
+          try {
+            JSON.parse(body);
+          } catch (e) {
+            err = "error";
           }
-          var json_token = JSON.parse(body);
-          var token = json_token.id_token;
-          var token_refresh = json_token.refresh_token;
-          connecteur.logger.info("refresh token function done");
-          getToken(token, token_refresh);
+          if(err != null){ //refresh token not valid anymore
+            const notifContent = localization.t('refresh token not valid', {});
+            notifHelper.createTemporary({
+              app: 'konnectors',
+              text: notifContent,
+              resource: {
+                app: 'konnectors/konnector/maif',
+              }
+            });
+          }
+          else{
+            var json_token = JSON.parse(body);
+            var token = json_token.id_token;
+            var token_refresh = json_token.refresh_token;
+            getToken(token, token_refresh);
+          }
         }, false);
       }
       else{
@@ -241,7 +310,6 @@ function refreshToken(){
       token_valid = false
     }
     if(!token_valid){
-      connecteur.logger.error("Token non valide. Veuillez vous reconnecter.");
       const notifContent = localization.t('refresh token not valid', {});
       notifHelper.createTemporary({
         app: 'konnectors',

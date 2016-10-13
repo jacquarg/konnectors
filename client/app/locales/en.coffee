@@ -3,7 +3,8 @@ module.exports =
     'bad credentials': 'Bad credentials. Check the konnector fields and run the import again.'
     'token not found': 'The token could not be retrieved'
     'key not found': 'Key not found'
-    'refresh token not valid': 'Your token is not valid anymore, please connect again to retrieve data'
+    'refresh token not valid': 'Your MAIF token is not valid anymore, please connect again to retrieve data'
+    'data retrieved': "MAIF data successfully retrieved"
     'request error': 'A request to the website failed, please see read the logs.'
     'parsing error': 'The result could not be parsed.'
     'file error': 'The file could not be created/modified/deleted'

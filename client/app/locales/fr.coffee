@@ -3,7 +3,8 @@ module.exports =
     'bad credentials': "Mauvais identifiants. Vérifiez les champs que vous avez renseignés."
     'token not found': "Le jeton n'a pas pu être récupéré"
     'key not found': 'Clé non trouvée'
-    'refresh token not valid': "Votre token n'est plus valide, veuillez vous connecter pour récupérer vos données"
+    'refresh token not valid': "Votre token MAIF n'est plus valide, veuillez vous connecter pour récupérer vos données"
+    'data retrieved': "Données MAIF récupérées avec succès"
     'request error': "Une requête au site web a échoué, veuillez lire les journaux de l'application."
     'parsing error': "Le retour n'a pas pu être interprété."
     'file error': "Le fichier n'a pas pu être créé/modifié/supprimé"
