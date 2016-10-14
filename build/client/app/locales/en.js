@@ -5,6 +5,7 @@ module.exports = {
   'key not found': 'Key not found',
   'refresh token not valid': 'Your MAIF token is not valid anymore, please connect again to retrieve data',
   'data retrieved': "MAIF data successfully retrieved",
+  'data retrieved failed': "MAIF data retrieving failed",
   'request error': 'A request to the website failed, please see read the logs.',
   'parsing error': 'The result could not be parsed.',
   'file error': 'The file could not be created/modified/deleted',

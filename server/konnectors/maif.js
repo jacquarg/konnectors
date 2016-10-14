@@ -231,17 +231,24 @@ function getData(token, res){
     };
 
     request(options, (err, response, body) =>{
-      if(err != null && res != undefined){
-        res.status(500).send("Erreur lors de la récupération des données.");
-      }
-      var payload = {profile: JSON.parse(body)};
-
-      maifuser.updateAttributes(payload, (err) => { //mise à jour du maifuser en base en insérant le token
-        sendNotification('data retrieved', 'mes-infos-maif');
+      if(err != null){
         if(res != undefined){
-          res.status(200).send("Données récupérées avec succès.");
+          res.status(500).send("Erreur lors de la récupération des données.");
         }
-      });
+        else{
+          sendNotification('data retrieved failed', 'konnectors/konnector/maif');
+        }
+      }
+      else{
+        var payload = {profile: JSON.parse(body)};
+
+        maifuser.updateAttributes(payload, (err) => { //mise à jour du maifuser en base en insérant le token
+          sendNotification('data retrieved', 'mes-infos-maif');
+          if(res != undefined){
+            res.status(200).send("Données récupérées avec succès.");
+          }
+        });
+      }
     }, false);
   });
 }
