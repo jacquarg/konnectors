@@ -180,14 +180,18 @@ module.exports.getCode = (req, res) => {
           redirect_uri :url_redirect
         }
       };
+      connecteur.logger.info(options);
       request(options, (err, response, body) =>{
         if(err != null){
+          connecteur.logger.error(err);
           res.status(500).send("Erreur lors de la récupération des données.");
         }
-        var json_token = JSON.parse(body);
-        var token = json_token.id_token;
-        var token_refresh = json_token.refresh_token;
-        getToken(token, token_refresh, res);
+        else{
+          var json_token = JSON.parse(body);
+          var token = json_token.id_token;
+          var token_refresh = json_token.refresh_token;
+          getToken(token, token_refresh, res);
+        }
       }, false);
     });
   });
@@ -233,14 +237,7 @@ function getData(token, res){
       var payload = {profile: JSON.parse(body)};
 
       maifuser.updateAttributes(payload, (err) => { //mise à jour du maifuser en base en insérant le token
-        const notifContent = localization.t('data retrieved', {});
-        notifHelper.createTemporary({
-          app: 'konnectors',
-          text: notifContent,
-          resource: {
-            app: 'konnectors/konnector/maif',
-          }
-        });
+        sendNotification('data retrieved', 'mes-infos-maif');
         if(res != undefined){
           res.status(200).send("Données récupérées avec succès.");
         }
@@ -285,14 +282,7 @@ function refreshToken(){
             err = "error";
           }
           if(err != null){ //refresh token not valid anymore
-            const notifContent = localization.t('refresh token not valid', {});
-            notifHelper.createTemporary({
-              app: 'konnectors',
-              text: notifContent,
-              resource: {
-                app: 'konnectors/konnector/maif',
-              }
-            });
+            sendNotification('refresh token not valid', 'konnectors/konnector/maif');
           }
           else{
             var json_token = JSON.parse(body);
@@ -310,14 +300,20 @@ function refreshToken(){
       token_valid = false
     }
     if(!token_valid){
-      const notifContent = localization.t('refresh token not valid', {});
-      notifHelper.createTemporary({
-        app: 'konnectors',
-        text: notifContent,
-        resource: {
-          app: 'konnectors/konnector/maif',
-        }
-      });
+      sendNotification('refresh token not valid', 'konnectors/konnector/maif');
+    }
+  });
+}
+
+function sendNotification(code, appToOpen){
+  code = code == undefined ? "" : code;
+  appToOpen = appToOpen == undefined ? 'konnectors/konnector/maif' : appToOpen;
+  var notifContent = localization.t(code, {});
+  notifHelper.createTemporary({
+    app: 'konnectors',
+    text: notifContent,
+    resource: {
+      app: appToOpen,
     }
   });
 }
