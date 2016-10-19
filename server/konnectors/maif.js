@@ -24,7 +24,7 @@ const MaifUser = require('../models/maifuser');
 // const client_id = "client-id";
 // const secret = "eX3mp1e";
 
-const env = "dev"; //dev / pprod / prod
+const env = "pprod"; //dev / pprod / prod
 
 var connect_url, apikey, info_url, client_id, secret;
 
@@ -37,14 +37,15 @@ switch(env){
     secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
   break;
   case "pprod":
-    connect_url = "http://connect-maiffr-pprodcorr.maif.local/connect/";
+    // connect_url = "http://connect-maiffr-pprodcorr.maif.local/connect/";
+    connect_url = "https://connectbuild.maif.fr/connect";
     apikey = "1f3299b5-967c-46ae-9bbe-94c22051da5e";
     info_url = "https://openapiweb-build.maif.fr/ppcor/cozy/v1/mes_infos?apikey="+apikey;
     client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
     secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
   break;
   case "prod":
-    connect_url = "https://connectbuild.maif.fr/connect";
+    connect_url = "https://connect.maif.fr/connect";
     apikey = "eeafd0bd-a921-420e-91ce-3b52ee5807e8";
     info_url = "https://openapiweb.maif.fr/prod/cozy/v1/mes_infos?apikey="+apikey;
     client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
@@ -135,6 +136,7 @@ function getConnectUrl(){
     state,
     nonce
   };
+  // console.log("connect url : " + base_url + toQueryString(params));
   return base_url + toQueryString(params);
 }
 
@@ -145,7 +147,13 @@ function getConnectUrl(){
 * call post request to get token
 */
 module.exports.getCode = (req, res) => {
+  // console.log("GETCODE");
   const payload = {};
+
+  /*console.log("connect url : " + connect_url);
+  console.log("info url : " + info_url);
+  console.log("client id : " + client_id);
+  console.log("secret : " + secret);*/
 
   MaifUser.getOne(function(err, maifuser){ //check if user doesn't already exist in database
     if(maifuser == undefined){
@@ -204,6 +212,7 @@ module.exports.getCode = (req, res) => {
 * call getData function
 */
 function getToken(token, token_refresh, res){
+  // console.log("get token with token : " + token);
   const payload = {password: token_refresh};
 
   MaifUser.getOne((err, maifuser) => {
@@ -219,6 +228,7 @@ function getToken(token, token_refresh, res){
 * sends get request with token to get JSON data in return
 */
 function getData(token, res){
+  // console.log("----------- get data");
   MaifUser.getOne((err, maifuser) => {
 
     var options = {
@@ -230,7 +240,11 @@ function getData(token, res){
       }
     };
 
+    // console.log(options);
+
     request(options, (err, response, body) =>{
+      // console.log("------------- get data response");
+      // console.log(body);
       if(err != null){
         if(res != undefined){
           res.status(500).send("Erreur lors de la récupération des données.");
@@ -312,6 +326,11 @@ function refreshToken(){
   });
 }
 
+/**
+* Display a notification in Cozy
+* code : code of the message to send
+* appToOpen : Link to the app that will be opened on notification's click
+*/
 function sendNotification(code, appToOpen){
   code = code == undefined ? "" : code;
   appToOpen = appToOpen == undefined ? 'konnectors/konnector/maif' : appToOpen;
