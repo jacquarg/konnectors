@@ -5,6 +5,8 @@ MaifUser = cozydb.getModel 'MaifUser',
         type: String
   profile: 
   		type: Object
+  date:
+      type: String
 
 module.exports = MaifUser
 

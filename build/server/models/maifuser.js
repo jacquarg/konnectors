@@ -9,6 +9,9 @@ MaifUser = cozydb.getModel('MaifUser', {
   },
   profile: {
     type: Object
+  },
+  date: {
+    type: String
   }
 });
 

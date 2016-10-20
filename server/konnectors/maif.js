@@ -24,7 +24,7 @@ const MaifUser = require('../models/maifuser');
 // const client_id = "client-id";
 // const secret = "eX3mp1e";
 
-const env = "pprod"; //dev / pprod / prod
+const env = "dev"; //dev / pprod / prod
 
 var connect_url, apikey, info_url, client_id, secret;
 
@@ -113,7 +113,10 @@ const connecteur = module.exports = factory.createNew({
         document.location.origin + '/apps/konnectors/public/getCode',
         'MaifConnect', 'width=800,height=800')
        return false;"
-       >Connexion</button>`,
+       >Connexion</button><br /> <br />
+       Vous pouvez définir une fréquence d'importation automatique des données.
+        Elle n'est pas obligatoire mais si vous souhaitez la faire, une mise à jour journalière est recommandée.
+       `,
 
   fields: {
   },
@@ -136,7 +139,6 @@ function getConnectUrl(){
     state,
     nonce
   };
-  // console.log("connect url : " + base_url + toQueryString(params));
   return base_url + toQueryString(params);
 }
 
@@ -147,13 +149,7 @@ function getConnectUrl(){
 * call post request to get token
 */
 module.exports.getCode = (req, res) => {
-  // console.log("GETCODE");
   const payload = {};
-
-  /*console.log("connect url : " + connect_url);
-  console.log("info url : " + info_url);
-  console.log("client id : " + client_id);
-  console.log("secret : " + secret);*/
 
   MaifUser.getOne(function(err, maifuser){ //check if user doesn't already exist in database
     if(maifuser == undefined){
@@ -190,6 +186,7 @@ module.exports.getCode = (req, res) => {
       };
       connecteur.logger.info(options);
       request(options, (err, response, body) =>{
+
         if(err != null){
           connecteur.logger.error(err);
           res.status(500).send("Erreur lors de la récupération des données.");
@@ -212,7 +209,6 @@ module.exports.getCode = (req, res) => {
 * call getData function
 */
 function getToken(token, token_refresh, res){
-  // console.log("get token with token : " + token);
   const payload = {password: token_refresh};
 
   MaifUser.getOne((err, maifuser) => {
@@ -228,7 +224,6 @@ function getToken(token, token_refresh, res){
 * sends get request with token to get JSON data in return
 */
 function getData(token, res){
-  // console.log("----------- get data");
   MaifUser.getOne((err, maifuser) => {
 
     var options = {
@@ -240,11 +235,7 @@ function getData(token, res){
       }
     };
 
-    // console.log(options);
-
     request(options, (err, response, body) =>{
-      // console.log("------------- get data response");
-      // console.log(body);
       if(err != null){
         if(res != undefined){
           res.status(500).send("Erreur lors de la récupération des données.");
@@ -254,7 +245,9 @@ function getData(token, res){
         }
       }
       else{
-        var payload = {profile: JSON.parse(body)};
+        moment.locale('fr');
+        var import_date = moment().format('LLL');
+        var payload = {profile: JSON.parse(body), 'date': import_date};
 
         maifuser.updateAttributes(payload, (err) => { //mise à jour du maifuser en base en insérant le token
           sendNotification('data retrieved', 'mes-infos-maif');
