@@ -19,11 +19,6 @@ const factory = require('../lib/base_konnector');
 
 const MaifUser = require('../models/maifuser');
 
-// const client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
-// const secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
-// const client_id = "client-id";
-// const secret = "eX3mp1e";
-
 const env = "dev"; //dev / pprod / prod
 
 var connect_url, apikey, info_url, client_id, secret;
@@ -60,39 +55,10 @@ switch(env){
   break;
 }
 
-
-// get code/token url
-// const connect_url = "https://connectbuild.maif.fr/connect";
-//dev
-// const connect_url = "http://connect-dev-d.maif.local/connect";
-//preprod, a priori
-// const connect_url = "http://connect-maiffr-pprodcorr.maif.local/connect/";
-//prod ?
-// const connect_url = "https://connectbuild.maif.fr/connect"; //?
-
-//dev
-// const apikey = "1f3299b5-967c-46ae-9bbe-94c22051da5e";
-//preprod
-// const apikey = "1f3299b5-967c-46ae-9bbe-94c22051da5e";
-//prod
-// const apikey = "eeafd0bd-a921-420e-91ce-3b52ee5807e8";
-
-//dev
-// const info_url = "http://slapp671.maif.local:7080/mapa/cozy/v1/mes_infos?apikey="+apikey;
-//preprod
-// const info_url = "https://openapiweb-build.maif.fr/ppcor/cozy/v1/mes_infos?apikey="+apikey;
-//prod
-// const info_url = "https://openapiweb.maif.fr/prod/cozy/v1/mes_infos?apikey="+apikey;
-
 const scope = "openid+profile+offline_access";
 const type = "code";
 var state = "";
 var nonce = "";
-
-//TEST
-// const societaire_login = "3466222n";
-// const societaire_pwd = "Maif1234";
-//TEST
 
 if(state == ""){
   state = generateUUID();
@@ -101,7 +67,6 @@ if(state == ""){
 if(nonce == ""){
   nonce = generateUUID();
 }
-
 
 const connecteur = module.exports = factory.createNew({
   name: 'MAIF',
@@ -186,22 +151,34 @@ module.exports.getCode = (req, res) => {
       };
       connecteur.logger.info(options);
       request(options, (err, response, body) =>{
-
+        console.log("RESPONSE");
+        console.log(body);
+        try {
+          JSON.parse(body);
+        } catch (e) {
+          err = "error";
+        }
         if(err != null){
           connecteur.logger.error(err);
           res.status(500).send("Erreur lors de la récupération des données.");
         }
         else{
-          var json_token = JSON.parse(body);
-          var token = json_token.id_token;
-          var token_refresh = json_token.refresh_token;
-          getToken(token, token_refresh, res);
+          if(JSON.parse(body).id_token == undefined){
+            connecteur.logger.error(err);
+            res.status(500).send("Erreur lors de la récupération des données.");
+          }
+          else{
+            var json_token = JSON.parse(body);
+            var token = json_token.id_token;
+            var token_refresh = json_token.refresh_token;
+            console.log("got token from url : " + token);
+            getToken(token, token_refresh, res);
+          }
         }
       }, false);
     });
   });
 };
-
 
 /**
 * function called when token returns
@@ -224,6 +201,7 @@ function getToken(token, token_refresh, res){
 * sends get request with token to get JSON data in return
 */
 function getData(token, res){
+  console.log("GET DATA");
   MaifUser.getOne((err, maifuser) => {
 
     var options = {
@@ -234,6 +212,8 @@ function getData(token, res){
         Authorization: "Bearer " +token
       }
     };
+
+    console.log(options);
 
     request(options, (err, response, body) =>{
       if(err != null){
@@ -248,6 +228,8 @@ function getData(token, res){
         moment.locale('fr');
         var import_date = moment().format('LLL');
         var payload = {profile: JSON.parse(body), 'date': import_date};
+        console.log("RESULTS");
+        console.log(body);
 
         maifuser.updateAttributes(payload, (err) => { //mise à jour du maifuser en base en insérant le token
           sendNotification('data retrieved', 'mes-infos-maif');
@@ -336,7 +318,6 @@ function sendNotification(code, appToOpen){
     }
   });
 }
-
 
 /**
 * generate UUID for nonce and state parameters

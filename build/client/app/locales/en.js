@@ -71,7 +71,7 @@ module.exports = {
   'konnector description orange': "Download all your Orange Bills. This konnector requires the Files application to store the bill PDF files.",
   'konnector description nest': "Save current temperature measured by your Nest thermostat.",
   'konnector description numericable': "Download all your Numéricable Bills. This konnector requires the Files application to store the bill PDF files.",
-  'konnector description maif': "Import your MAIF data and display them in your Cozy.",
+  'konnector description maif': "Import your MAIF data.",
   'konnector description virgin_mobile': "Download all your Virgin Mobile  bills. This konnector requires the Files application to store the bill PDF files.",
   'konnector description online_net': "Download all your Online.net bills. This konnector requires the Files application to store the bill PDF files.",
   'konnector description ovh_eu': "Download all your OVH Europe bills. This konnector requires the Files application to store the bill PDF files.<br/>\nAt your first import, we will generate a link from which you will be able to enter your OVH Europe credentials.",
