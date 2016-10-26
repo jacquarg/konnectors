@@ -85,14 +85,7 @@ var connecteur = module.exports = factory.createNew({
 */
 function getConnectUrl() {
   var base_url = connect_url + "/authorize?";
-  var params = {
-    response_type: type,
-    client_id: client_id,
-    scope: scope,
-    state: state,
-    nonce: nonce
-  };
-  return base_url + toQueryString(params);
+  return base_url + "response_type=" + type + "&client_id=" + client_id + "&scope=" + scope + "&state=" + state + "&nonce=" + nonce;
 }
 
 /**
@@ -140,8 +133,6 @@ module.exports.getCode = function (req, res) {
       };
       connecteur.logger.info(options);
       request(options, function (err, response, body) {
-        console.log("RESPONSE");
-        console.log(body);
         try {
           JSON.parse(body);
         } catch (e) {
@@ -158,7 +149,6 @@ module.exports.getCode = function (req, res) {
             var json_token = JSON.parse(body);
             var token = json_token.id_token;
             var token_refresh = json_token.refresh_token;
-            console.log("got token from url : " + token);
             getToken(token, token_refresh, res);
           }
         }
@@ -188,7 +178,6 @@ function getToken(token, token_refresh, res) {
 * sends get request with token to get JSON data in return
 */
 function getData(token, res) {
-  console.log("GET DATA");
   MaifUser.getOne(function (err, maifuser) {
 
     var options = {
@@ -199,8 +188,6 @@ function getData(token, res) {
         Authorization: "Bearer " + token
       }
     };
-
-    console.log(options);
 
     request(options, function (err, response, body) {
       if (err != null) {
@@ -213,8 +200,6 @@ function getData(token, res) {
         moment.locale('fr');
         var import_date = moment().format('LLL');
         var payload = { profile: JSON.parse(body), 'date': import_date };
-        console.log("RESULTS");
-        console.log(body);
 
         maifuser.updateAttributes(payload, function (err) {
           //mise à jour du maifuser en base en insérant le token
