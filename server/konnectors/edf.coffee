@@ -10,7 +10,6 @@ builder = new xml2js.Builder headless: true
 
 # TODO :
 # Move updateOrCreate in a lib
-# Add clientId to bill
 # multi account
 # multi contract
 
@@ -30,6 +29,7 @@ Client = cozydb.getModel 'Client',
     docTypeVersion: String
 
 Contract = cozydb.getModel 'Contract',
+    clientId: String
     vendor: String
     number: String
     start: String
@@ -98,6 +98,7 @@ ConsumptionStatement = cozydb.getModel 'ConsumptionStatement',
     docTypeVersion: String
 
 Bill = cozydb.getModel 'Bill',
+    clientId: String
     vendor: String
     date: String
     number: String
@@ -221,6 +222,7 @@ fetchListerContratClientParticulier = (requiredFields, entries, data, callback) 
             contracts = contratElems.map (contratElem) ->
                 contract =
                     vendor: 'EDF'
+                    clientId: client.clientId
                     docTypeVersion: getDocTypeVersion()
 
                 contract.number = getF contratElem, 'tns:Numero'
@@ -263,7 +265,7 @@ fetchListerContratClientParticulier = (requiredFields, entries, data, callback) 
                     OFFRE_TPN: 'TPN'
                 , getF(offreSouscriteObj, 'tns:NomOffre')
 
-                contract.numeroDepannage = getF offreSouscriteObj, 'tns:NumeroDepanageContrat'
+                contract.numeroDepannage = getF offreSouscriteObj, 'tns:NumeroDepannageContrat'
 
                 switch contract.energie
                     when 'Électricité'
@@ -432,6 +434,7 @@ fetchVisualiserAccordCommercial = (requiredFields, entries, data, callback) ->
 
             paymentTerms =
                 vendor: 'EDF'
+                clientId: entries.client.clientId
                 docTypeVersion: getDocTypeVersion()
 
             paymentTerms.bankDetails =
@@ -508,7 +511,6 @@ fetchVisualiserCalendrierPaiement = (requiredFields, entries, data, callback) ->
 
     edfRequestPost path, body, (err, result) ->
         return callback err if err
-
         try
             listeEcheances = getF(result["ns:msgReponse"], "ns:corpsSortie", \
                 "ns:calendrierDePaiement")["ns:listeEcheances"]
@@ -573,6 +575,7 @@ fetchRecupereDocumentContractuelListx = (requiredFields, entries, data, callback
             bills = documents.map (elem) ->
                 bill =
                     vendor: 'EDF'
+                    clientId: entries.client.clientId
                     docTypeVersion: getDocTypeVersion()
 
                 date = moment getF(elem, 'ns:datecre'), 'YYYYMMDD'
@@ -584,7 +587,7 @@ fetchRecupereDocumentContractuelListx = (requiredFields, entries, data, callback
 
                     switch key
                         when '4' then bill.number = value
-                        when '7' then bill.amount = value
+                        when '7' then bill.amount = Number value
 
                 return bill
 
@@ -654,7 +657,6 @@ fetchVisualiserHistoConso = (requiredFields, entries, data, callback) ->
         , []
 
         K.logger.info "Fetched #{entries.consumptionStatements.length} consumptionStatements"
-
         callback()
 
 
@@ -772,8 +774,6 @@ fetchEdeliaMonthlyElecConsumptions = (requiredFields, entries, data, callback) -
     getEdelia data.edeliaToken, "/sites/-/monthly-elec-consumptions?begin-month=2012-01&end-month=#{moment().add(1, 'month').format('YYYY-MM')}&ended=false", (err, response, obj) ->
 
         error = null
-        #console.log obj
-        #console.log response
         try
             if response.statusCode is 404 or response.statusCode is 500
                 K.logger.warn 'No EdeliaMonthlyElecConsumptions'
@@ -1200,7 +1200,6 @@ K = module.exports = require('../lib/base_konnector').createNew
         fetchEdeliaMonthlyElecConsumptions
         fetchEdeliaSimilarHomeYearlyElecComparisions
         fetchEdeliaElecIndexes
-
         fetchEdeliaMonthlyGasConsumptions
         fetchEdeliaSimilarHomeYearlyGasComparisions
         fetchEdeliaGasIndexes

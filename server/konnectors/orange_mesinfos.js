@@ -22,7 +22,7 @@ const connector = module.exports = baseKonnector.createNew({
     access_token: 'text',
   },
 
-  models: [Event],
+  models: [],
 
   fetchOperations: [
     downloadData,
