@@ -190,6 +190,11 @@ function getData(token, res) {
     };
 
     request(options, function (err, response, body) {
+      try {
+        JSON.parse(body);
+      } catch (e) {
+        err = "error";
+      }
       if (err != null) {
         if (res != undefined) {
           res.status(500).send("Erreur lors de la récupération des données.");
