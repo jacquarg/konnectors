@@ -19,7 +19,7 @@ const factory = require('../lib/base_konnector');
 
 const MaifUser = require('../models/maifuser');
 
-const env = "dev"; //dev / pprod / prod
+const env = "prod"; //dev / pprod / prod
 
 var connect_url, apikey, info_url, client_id, secret;
 
@@ -43,8 +43,8 @@ switch(env){
     connect_url = "https://connect.maif.fr/connect";
     apikey = "eeafd0bd-a921-420e-91ce-3b52ee5807e8";
     info_url = "https://openapiweb.maif.fr/prod/cozy/v1/mes_infos?apikey="+apikey;
-    client_id = "eea55366-14b5-4609-ac4d-45f6abfad351";
-    secret = "AILc_ai8K1o68uEnx56L2V9v08siwCIuvWmQSjbpcfq9_wwtxQYw20SjMi9NXZaT3Wi0jWuSQwTlpufQ4UzGXz4";
+    client_id = "2921ebd6-5599-4fa6-a533-0537fac62cfe";
+    secret = "Z_-AMVTppsgj_F9tRLXfwUm6Wdq8OOv5a4ydDYzvbhFjMcp8aM90D0sdNp2kdaEczeGH_qYZhhd9JIzWkoWdGw";
   break;
   default:
     connect_url = "http://connect-dev-d.maif.local/connect";
