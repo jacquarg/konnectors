@@ -68,9 +68,13 @@ getEDFToken = function(requiredFields, entries, data, callback) {
     }
   };
   return edfRequestPost(path, body, function(err, result) {
-    var token;
+    var errorCode, token;
     if (err) {
       return callback(err);
+    }
+    errorCode = getF(result, 'ns:enteteSortie', 'ent:codeRetour');
+    if (errorCode && errorCode !== '0000') {
+      K.logger.error(getF(result, 'ns:enteteSortie', 'ent:libelleRetour '));
     }
     token = getF(result['ns:msgReponse'], 'ns:corpsSortie', 'ns:jeton');
     if (token != null) {
@@ -101,11 +105,16 @@ fetchListerContratClientParticulier = function(reqFields, entries, data, callbac
     }
   };
   return edfRequestPost(path, body, function(err, result) {
-    var addressObject, bpObject, civilite, client, coHolder, coTitulaireElem, codePostal, contracts, contratElems, e, identiteObj, nom, nomRue, numRue, prenom, resBody, ville;
+    var addressObject, bpObject, civilite, client, coHolder, coTitulaireElem, codePostal, contracts, contratElems, e, errorCode, identiteObj, nom, nomRue, numRue, prenom, resBody, ville;
     if (err) {
       return callback(err);
     }
     try {
+      errorCode = getF(result, 'tns:EnteteSortie', 'tns:CodeErreur');
+      if (errorCode && errorCode !== 'PSC0000') {
+        K.logger.error(getF(result, 'tns:EnteteSortie', 'tns:LibelleErreur'));
+        return callback('request error');
+      }
       client = {
         vendor: 'EDF',
         docTypeVersion: K.docTypeVersion
@@ -295,11 +304,16 @@ fetchVisualiserPartenaire = function(requiredFields, entries, data, callback) {
     }
   };
   return edfRequestPost(path, body, function(err, result) {
-    var address, addressElem, client, contact, contactElem, coordonneesElem, e, partnerElem;
+    var address, addressElem, client, contact, contactElem, coordonneesElem, e, errorCode, partnerElem;
     if (err) {
       return callback(err);
     }
     try {
+      errorCode = getF(result, 'ns:enteteSortie', 'ent:codeRetour');
+      if (errorCode && errorCode !== '0') {
+        K.logger.error(getF(result, 'tns:enteteSortie', 'tns:libelleRetour'));
+        return callback();
+      }
       partnerElem = getF(result["ns:msgReponse"], "ns:corpsSortie", "ns:partenaire");
       client = {};
       coordonneesElem = getF(partnerElem, 'ns:coordonnees');
@@ -356,11 +370,16 @@ fetchVisualiserAccordCommercial = function(requiredFields, entries, data, callba
     }
   };
   return edfRequestPost(path, body, function(err, result) {
-    var acoElem, bankAddress, bankDetails, e, paymentTerms, services, servicesElem;
+    var acoElem, bankAddress, bankDetails, e, errorCode, paymentTerms, services, servicesElem;
     if (err) {
       return callback(err);
     }
     try {
+      errorCode = getF(result, 'ns:enteteSortie', 'ent:codeErreur');
+      if (errorCode && errorCode !== '0') {
+        K.logger.error(getF(result, 'tns:enteteSortie', 'tns:libelleErreur'));
+        return callback();
+      }
       acoElem = getF(result["ns:msgReponse"], "ns:corpsSortie", "ns:listeAccordCommerciaux", "ns:acordcommercial");
       paymentTerms = {
         vendor: 'EDF',
@@ -439,11 +458,16 @@ fetchVisualiserCalendrierPaiement = function(requiredFields, entries, data, call
     }
   };
   return edfRequestPost(path, body, function(err, result) {
-    var e, listeEcheances, paymentSchedules;
+    var e, errorCode, listeEcheances, paymentSchedules;
     if (err) {
       return callback(err);
     }
     try {
+      errorCode = getF(result, 'ns:msgReponse', 'ns:enteteSortie', 'ent:codeRetour');
+      if (errorCode && errorCode !== '0') {
+        K.logger.error(getF(result, 'ns:msgReponse', 'ns:enteteSortie', 'ent:libelleRetour'));
+        callback();
+      }
       listeEcheances = getF(result["ns:msgReponse"], "ns:corpsSortie", "ns:calendrierDePaiement")["ns:listeEcheances"];
       paymentSchedules = listeEcheances.map(function(echeance) {
         var amountElec, amountGaz, doc;
@@ -579,11 +603,16 @@ fetchVisualiserHistoConso = function(requiredFields, entries, data, callback) {
       }
     };
     return edfRequestPost(path, body, function(err, result) {
-      var consoElems, e, res;
+      var consoElems, e, errorCode, res;
       if (err) {
         return callback(err);
       }
       try {
+        errorCode = getF(result, 'ns:enteteSortie', 'ent:codeRetour');
+        if (errorCode && errorCode !== '0') {
+          K.logger.error(getF(result, 'tns:enteteSortie', 'tns:libelleRetour'));
+        }
+        return callback();
         if (!("ns:corpsSortie" in result["ns:msgReponse"])) {
           K.logger.info("No histoConsos to fetch");
           return callback(null, []);
@@ -1210,15 +1239,10 @@ _edfRequestPost = function(path, body, callback) {
       return callback('request error');
     }
     return parser.parseString(data, function(err, result) {
-      var errorCode;
       if (err) {
         return callback('request error');
       }
-      errorCode = getF(result['ns:msgReponse'], 'ns:enteteSortie', 'ent:codeErreur');
-      if (errorCode === '0') {
-        errorCode = null;
-      }
-      return callback(errorCode, result);
+      return callback(null, result);
     });
   });
 };
