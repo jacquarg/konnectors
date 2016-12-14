@@ -88,28 +88,14 @@ function saveTokenInKonnector(requiredFields, entries, data, callback) {
   const Konnector = require('../models/konnector');
   /* eslint-enable global-require */
   // TODO: should work:
-  // Konnector.get(connector.slug, function(err, konnector) {
-  Konnector.all((err, konnectors) => {
+  Konnector.get(connector.slug, (err, konnector) => {
     if (err) {
-      connector.logger.error(`Can't fetch konnector instances: ${err.msg}`);
-      return callback(err);
-    }
-    let konnector = null;
-    try {
-      konnector = konnectors.filter(k => k.slug === connector.slug)[0];
-
-      // Find which account we are using now.
-      const currentAccount = konnector.accounts.filter(account =>
-        account.accessToken === requiredFields.accessToken)[0];
-
-      currentAccount.accessToken = data.accessToken;
-    } catch (e) {
-      connector.logger.error("Can't fetch konnector instances");
-      return callback(e);
+      connector.logger.error(err);
+      return callback('internal error');
     }
 
-    return konnector.updateAttributes({ accounts: konnector.accounts },
-      callback);
+    requiredFields.accessToken = data.accessToken;
+    konnector.updateFieldValues({ accounts: [requiredFields] }, callback);
   });
 }
 
